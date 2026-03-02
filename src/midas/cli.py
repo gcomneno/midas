@@ -2,10 +2,31 @@ from __future__ import annotations
 
 import argparse
 import json
+
+from typing import Any, cast
 from pathlib import Path
 from random import Random
 
 from midas.microscope import MicroscopeConfig, report_to_dict, run_microscope
+
+
+def _get_dict_list(d: dict[str, Any], key: str) -> list[dict[str, Any]]:
+    x = d.get(key)
+    if x is None:
+        return []
+    if isinstance(x, list):
+        return [e for e in x if isinstance(e, dict)]
+    return []
+
+
+def _get_str_list(d: dict[str, Any], key: str) -> list[str]:
+    x = d.get(key)
+    if x is None:
+        return []
+    if isinstance(x, list):
+        return [s for s in x if isinstance(s, str)]
+
+    return []
 
 
 def parse_lens(s: str) -> list[int]:
@@ -211,15 +232,20 @@ def cmd_analyze(args: argparse.Namespace) -> int:
             print(f"snr={snr:.6f}")
         else:
             print(f"snr={snr}")
-        hs = v.get("hotspots", [])
+
+        hs = _get_dict_list(v, "hotspots")
         if hs:
-            hs_str = ", ".join(f"k={h['k']} delta={h['delta']:+.3f}" for h in hs)
+            hs_str = ", ".join(
+                f"k={h.get('k')} delta={float(h.get('delta', 0.0)):+.3f}"
+                for h in hs
+            )
             print(f"hotspots={hs_str}")
-        for note in v.get("notes", []):
+
+        for note in _get_str_list(v, "notes"):
             print(f"note: {note}")
-        for hyp in v.get("hypothesis", []):
+        for hyp in _get_str_list(v, "hypothesis"):
             print(f"hypothesis: {hyp}")
-        for ev in v.get("evidence", []):
+        for ev in _get_str_list(v, "evidence"):
             print(f"evidence: {ev}")
 
     # ---- JSON output ----
