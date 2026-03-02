@@ -206,7 +206,11 @@ def cmd_analyze(args: argparse.Namespace) -> int:
         v = report.verdict
         print("\n-- VERDICT --")
         print(f"verdict={v.get('verdict')}")
-        print(f"snr={v.get('snr')}")
+        snr = v.get("snr")
+        if isinstance(snr, (int, float)):
+            print(f"snr={snr:.6f}")
+        else:
+            print(f"snr={snr}")
         hs = v.get("hotspots", [])
         if hs:
             hs_str = ", ".join(f"k={h['k']} delta={h['delta']:+.3f}" for h in hs)

@@ -33,5 +33,5 @@ signal_to_noise=56.07
 
 -- VERDICT --
 verdict=structured
-snr=56.06611570247951
+snr=56.066116
 note: extreme_modular_bias_detected (max_z=24.37 at k=2, M=15)

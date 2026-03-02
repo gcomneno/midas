@@ -33,4 +33,4 @@ signal_to_noise=2.91
 
 -- VERDICT --
 verdict=weak_structure
-snr=2.9090909090909194
+snr=2.909091
