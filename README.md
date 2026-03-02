@@ -1,4 +1,6 @@
 # MIDAS — Modular Integer Dataset Analysis System
+![CI](../../actions/workflows/ci.yml/badge.svg)
+
 Deterministic, explainable, minimal analysis of **integer datasets** to detect **non-random modular structure**.
 - Not ML
 - Not prediction
