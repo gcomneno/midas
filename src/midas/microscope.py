@@ -192,7 +192,7 @@ def diagnose_from_report(
         max_z = 0.0
         max_k = None
         max_M = None
-        
+
     if snr is None:
         verdict = "no_baseline"
         notes.append("baseline non calcolata (usa --baseline-random)")
@@ -201,6 +201,8 @@ def diagnose_from_report(
             verdict = "random_like"
         elif snr < 5.0:
             verdict = "weak_structure"
+            if snr < 3.0:
+                notes.append("borderline_signal")
         else:
             verdict = "structured"
 

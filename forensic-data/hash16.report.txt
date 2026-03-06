@@ -1,0 +1,37 @@
+
+=== MIDAS Microscope Report ===
+mode=file:hash16.txt  seed=123456  N=10000  range=[0,1000000000)  K=6
+lens primes=[3, 5, 7, 11, 13, 17]
+
+-- Bucket occupancy by level (mod M_k) --
+k= 1  p= 3  M=3         non_empty=3       coverage=1.0000  max_bucket=3481  top3=[(1, 3481), (2, 3299), (0, 3220)]
+k= 2  p= 5  M=15        non_empty=15      coverage=1.0000  max_bucket=823  top3=[(7, 823), (1, 699), (8, 698)]
+k= 3  p= 7  M=105       non_empty=105     coverage=1.0000  max_bucket=264  top3=[(22, 264), (78, 145), (91, 140)]
+k= 4  p=11  M=1155      non_empty=1153    coverage=0.9983  max_bucket=161  top3=[(652, 161), (813, 59), (406, 55)]
+k= 5  p=13  M=15015     non_empty=6442    coverage=0.6442  max_bucket=153  top3=[(6427, 153), (1968, 52), (9646, 44)]
+k= 6  p=17  M=255255    non_empty=8252    coverage=0.8252  max_bucket=152  top3=[(111532, 152), (197163, 52), (69706, 43)]
+
+-- Sampled k* depth distribution (pairs sampled) --
+pairs=50000
+k*= 0  count=33111   frac=0.6622
+k*= 1  count=13474   frac=0.2695
+k*= 2  count=2918    frac=0.0584
+k*= 3  count=431     frac=0.0086
+k*= 4  count=41      frac=0.0008
+k*= 5  count=3       frac=0.0001
+k*= 6  count=22      frac=0.0004
+
+-- Fingerprint (k* fractions) --
+[0:0.662, 1:0.269, 2:0.058, 3:0.009, 4:0.001, 5:0.000, 6:0.000]
+
+-- Baseline comparison (vs random) --
+baseline_fingerprint=[0:0.669, 1:0.265, 2:0.057, 3:0.008, 4:0.001, 5:0.000, 6:0.000]
+delta=[0:-0.006, 1:+0.004, 2:+0.001, 3:+0.000, 4:+0.000, 5:+0.000, 6:+0.000]
+anomaly_score_L1=0.0128
+noise_floor_L1=0.0026
+signal_to_noise=4.94
+
+-- VERDICT --
+verdict=structured
+snr=4.938462
+note: extreme_modular_bias_detected (max_z=51.80 at k=4, M=1155)

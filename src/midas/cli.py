@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import argparse
 import json
-
-from typing import Any, cast
 from pathlib import Path
 from random import Random
+from typing import Any
 
 from midas.microscope import MicroscopeConfig, report_to_dict, run_microscope
+from midas.scanner import scan_modular_anomalies, anomalies_to_dict
 
 
 def _get_dict_list(d: dict[str, Any], key: str) -> list[dict[str, Any]]:
@@ -25,7 +25,6 @@ def _get_str_list(d: dict[str, Any], key: str) -> list[str]:
         return []
     if isinstance(x, list):
         return [s for s in x if isinstance(s, str)]
-
     return []
 
 
@@ -52,7 +51,7 @@ def first_primes(n: int) -> list[int]:
             if x % d == 0:
                 is_prime = False
                 break
-            d += 1 if d == 2 else 2  # dopo 2, solo dispari
+            d += 1 if d == 2 else 2
         if is_prime:
             primes.append(x)
         x += 1 if x == 2 else 2
@@ -69,7 +68,6 @@ def read_int_lines(path: Path) -> list[int]:
         line = raw.strip()
         if not line or line.startswith("#"):
             continue
-        # supporta commenti inline: "123  # bla"
         if "#" in line:
             line = line.split("#", 1)[0].strip()
         try:
@@ -107,10 +105,9 @@ def synth_values(kind: str, *, N: int, lo: int, hi: int, seed: int) -> list[int]
     if kind == "powers2":
         return [pow(2, i, hi) for i in range(N)]
     if kind == "timestampish":
-        # Crescente + rumore: simula timestamp/ID con jitter
-        base = 1_700_000_000  # finto "epoch"
-        step = 37            # passo costante (struttura)
-        jitter = 2000        # rumore (maschera parzialmente)
+        base = 1_700_000_000
+        step = 37
+        jitter = 2000
         out = []
         t = base
         for _ in range(N):
@@ -118,11 +115,9 @@ def synth_values(kind: str, *, N: int, lo: int, hi: int, seed: int) -> list[int]
             out.append((t + rng.randrange(-jitter, jitter + 1)) % hi)
         return out
     if kind == "weak_id":
-        # ID "quasi random": prendi random, ma forza le ultime 3 cifre a 000..999 con bias
         out = []
         for _ in range(N):
             x = rng.randrange(lo, hi // 1000) * 1000
-            # bias: spesso termina con 000 o 500
             tail = 0 if rng.random() < 0.45 else (500 if rng.random() < 0.5 else rng.randrange(1000))
             out.append(x + tail)
         return out
@@ -146,7 +141,6 @@ def cmd_analyze(args: argparse.Namespace) -> int:
 
         mode_label = f"file:{args.input.name}"
 
-        # Se il file ha più di N, taglia; se ne ha meno, aggiorna N
         if len(values) >= N:
             values = values[:N]
         else:
@@ -155,7 +149,6 @@ def cmd_analyze(args: argparse.Namespace) -> int:
         values = synth_values(args.synth, N=N, lo=lo, hi=hi, seed=seed)
         mode_label = f"synth:{args.synth}"
     else:
-        # compat: lasciamo anche queste modalità “legacy” del wrapper, anche se non sono la CLI “ufficiale”
         if args.mode == "R":
             values = [rng.randrange(lo, hi) for _ in range(N)]
             mode_label = "random"
@@ -184,8 +177,8 @@ def cmd_analyze(args: argparse.Namespace) -> int:
     )
 
     report = run_microscope(values, mode=mode_label, config=config, baseline_random=args.baseline_random)
+    anomalies = scan_modular_anomalies(values, config, top_n=args.scan_limit) if args.scan_anomalies else []
 
-    # ---- Console output (SSOT: wrapper) ----
     print("\n=== MIDAS Microscope Report ===")
     print(f"mode={report.mode}  seed={seed}  N={N}  range=[{lo},{hi})  K={K}")
     print(f"lens primes={primes}")
@@ -212,7 +205,6 @@ def cmd_analyze(args: argparse.Namespace) -> int:
         print("\n-- Baseline comparison (vs random) --")
         print(f"baseline_fingerprint={format_fp(report.baseline_random_0, K)}")
 
-        # delta compatto
         delta_parts = []
         for k in range(0, K + 1):
             d = report.kstar_fractions.get(str(k), 0.0) - report.baseline_random_0.get(str(k), 0.0)
@@ -232,7 +224,6 @@ def cmd_analyze(args: argparse.Namespace) -> int:
             print(f"snr={snr:.6f}")
         else:
             print(f"snr={snr}")
-
         hs = _get_dict_list(v, "hotspots")
         if hs:
             hs_str = ", ".join(
@@ -240,7 +231,6 @@ def cmd_analyze(args: argparse.Namespace) -> int:
                 for h in hs
             )
             print(f"hotspots={hs_str}")
-
         for note in _get_str_list(v, "notes"):
             print(f"note: {note}")
         for hyp in _get_str_list(v, "hypothesis"):
@@ -248,9 +238,22 @@ def cmd_analyze(args: argparse.Namespace) -> int:
         for ev in _get_str_list(v, "evidence"):
             print(f"evidence: {ev}")
 
-    # ---- JSON output ----
+    if args.scan_anomalies:
+        print("\n-- MODULAR ANOMALY SCANNER --")
+        if not anomalies:
+            print("no_significant_bucket_anomalies")
+        else:
+            for a in anomalies:
+                print(
+                    f"k={a.k:2d}  p={a.p:2d}  M={a.M:<8d}  residue={a.residue:<6d}  "
+                    f"count={a.count:<6d}  expected={a.expected_mean:0.2f}  "
+                    f"z={a.z:0.2f}  amplification={a.amplification:0.2f}"
+                )
+
     if args.json is not None:
         payload = report_to_dict(report)
+        if args.scan_anomalies:
+            payload["modular_anomalies"] = anomalies_to_dict(anomalies)
         args.json.parent.mkdir(parents=True, exist_ok=True)
         args.json.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
         print(f"\n(JSON scritto in: {args.json})")
@@ -269,7 +272,6 @@ def build_parser() -> argparse.ArgumentParser:
     a.add_argument("--hi", type=int, default=10**9)
     a.add_argument("--pairs", type=int, default=50_000)
 
-    # Legacy modes (rimangono per comodità; la CLI “ufficiale” è --input o --synth)
     a.add_argument(
         "--mode",
         choices=["R", "A", "B", "C"],
@@ -286,6 +288,17 @@ def build_parser() -> argparse.ArgumentParser:
         "--baseline-random",
         action="store_true",
         help="Compute random baselines and show anomaly/noise/SNR",
+    )
+    a.add_argument(
+        "--scan-anomalies",
+        action="store_true",
+        help="Scan bucket occupancies and report significant modular anomalies",
+    )
+    a.add_argument(
+        "--scan-limit",
+        type=int,
+        default=10,
+        help="Maximum number of modular anomalies to print when --scan-anomalies is enabled",
     )
     a.add_argument("--input", type=Path, default=None, help="Read integers from a file")
     a.add_argument(
