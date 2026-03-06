@@ -7,7 +7,6 @@ MIDAS analyzes integer sequences to detect **non‑random modular structure** us
 explainable method based on modular arithmetic.
 
 MIDAS deliberately avoids:
-
 - Machine Learning
 - Prediction models
 - Continuous statistical fitting
@@ -18,7 +17,7 @@ Instead, it performs **multi‑level modular analysis** on integer datasets.
 
 # Concept
 
-MIDAS applies a sequence of modular lenses using small primes:
+MIDAS applies a sequence of "modular lenses" using small primes:
 
 primes = [3, 5, 7, 11, 13, 17]
 
@@ -27,7 +26,6 @@ For each level `k`:
 M_k = product(primes[:k])
 
 The dataset is bucketed modulo `M_k` and MIDAS measures:
-
 - bucket coverage
 - largest bucket
 - expected mean occupancy
@@ -48,7 +46,6 @@ The resulting distribution forms a **fingerprint of structural depth**.
 
 The fingerprint is compared against a deterministic Monte‑Carlo baseline,
 producing:
-
 - anomaly score (L1 distance)
 - noise floor
 - signal‑to‑noise ratio (SNR)
@@ -67,14 +64,10 @@ Additional notes may appear:
 
 note: borderline_signal
 
-This occurs when:
-
-2 ≤ snr < 3
-
+This occurs when: 2 ≤ snr < 3
 indicating the signal is **near the decision boundary**.
 
 Strong biases may also trigger:
-
 note: strong_modular_bias_detected
 note: extreme_modular_bias_detected
 
@@ -85,26 +78,21 @@ note: extreme_modular_bias_detected
 MIDAS can localize **where the modular bias occurs**.
 
 Enable it with:
-
 midas analyze --scan-anomalies ...
 
 Example:
-
 midas analyze --synth weak_id --N 976 --baseline-random --scan-anomalies
 
 Example output:
-
 -- MODULAR ANOMALY SCANNER --
 k= 2  p= 5  M=15        residue=0       count=255     expected=65.07
 k= 2  p= 5  M=15        residue=5       count=255     expected=65.07
 k= 2  p= 5  M=15        residue=10      count=236     expected=65.07
 
 Meaning:
-
 The dataset concentrates around residues {0,5,10} modulo 15.
 
 Scanner output includes:
-
 - level k
 - prime p
 - modulus M
@@ -126,7 +114,6 @@ python -m pip install -U pip
 python -m pip install -e .
 
 Requirements:
-
 Python ≥ 3.10
 
 ---
@@ -134,15 +121,12 @@ Python ≥ 3.10
 # Usage
 
 Analyze a synthetic dataset:
-
 midas analyze --synth weak_id --N 976 --seed 123456 --baseline-random
 
 Analyze integers from a file:
-
 midas analyze --input data.txt --baseline-random
 
 Run anomaly scanner:
-
 midas analyze --input data.txt --baseline-random --scan-anomalies
 
 ---
@@ -152,11 +136,9 @@ midas analyze --input data.txt --baseline-random --scan-anomalies
 MIDAS uses **golden tests** to guarantee deterministic CLI output.
 
 Run tests with:
-
 pytest
 
 Golden tests ensure:
-
 - stable output
 - reproducible diagnostics
 - regression protection
@@ -166,7 +148,6 @@ Golden tests ensure:
 # Design Philosophy
 
 MIDAS follows strict principles:
-
 - deterministic
 - minimal
 - explainable
@@ -177,5 +158,4 @@ The goal is **structural diagnostics**, not prediction.
 ---
 
 # License
-
 MIT
