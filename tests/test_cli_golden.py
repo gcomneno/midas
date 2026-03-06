@@ -31,3 +31,15 @@ def test_analyze_uniform_golden():
         "--baseline-random",
     ])
     assert out == expected
+
+def test_analyze_weak_id_scan_golden():
+    expected = (ROOT / "tests/data/expected/analyze_weak_id_scan.txt").read_text(encoding="utf-8")
+    out = run_cli([
+        "analyze",
+        "--synth", "weak_id",
+        "--N", "976",
+        "--seed", "123456",
+        "--baseline-random",
+        "--scan-anomalies",
+    ])
+    assert out == expected
