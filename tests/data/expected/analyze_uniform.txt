@@ -34,3 +34,4 @@ signal_to_noise=2.91
 -- VERDICT --
 verdict=weak_structure
 snr=2.909091
+note: borderline_signal
