@@ -98,29 +98,51 @@ def read_jsonl_field(path: Path, field: str) -> list[int]:
 
 def synth_values(kind: str, *, N: int, lo: int, hi: int, seed: int) -> list[int]:
     rng = Random(seed)
+
     if kind == "uniform":
         return [rng.randrange(lo, hi) for _ in range(N)]
+
     if kind == "step1000":
         return [i * 1000 for i in range(N)]
+
     if kind == "powers2":
         return [pow(2, i, hi) for i in range(N)]
+
     if kind == "timestampish":
         base = 1_700_000_000
         step = 37
         jitter = 2000
-        out = []
+        randrange = rng.randrange
+
+        out: list[int] = []
         t = base
         for _ in range(N):
             t += step
-            out.append((t + rng.randrange(-jitter, jitter + 1)) % hi)
+            out.append((t + randrange(-jitter, jitter + 1)) % hi)
         return out
+
     if kind == "weak_id":
-        out = []
+        randrange = rng.randrange
+        random = rng.random
+        hi_div_1000 = hi // 1000
+
+        out: list[int] = []
         for _ in range(N):
-            x = rng.randrange(lo, hi // 1000) * 1000
-            tail = 0 if rng.random() < 0.45 else (500 if rng.random() < 0.5 else rng.randrange(1000))
+            x = randrange(lo, hi_div_1000) * 1000
+
+            r1 = random()
+            if r1 < 0.45:
+                tail = 0
+            else:
+                r2 = random()
+                if r2 < 0.5:
+                    tail = 500
+                else:
+                    tail = randrange(1000)
+
             out.append(x + tail)
         return out
+
     raise ValueError(f"unknown synth kind: {kind!r}")
 
 

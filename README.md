@@ -157,5 +157,13 @@ The goal is **structural diagnostics**, not prediction.
 
 ---
 
+# Notes
+Performance pass completed.
+Safe micro-optimizations retained.
+Experimental residue-cache approach rejected after regression.
+Current pure-Python design considered near practical plateau.
+
+---
+
 # License
 MIT
