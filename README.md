@@ -107,27 +107,50 @@ This helps explain **why MIDAS detected structure**.
 
 # Installation (dev)
 
+```bash
 python -m venv .venv
 source .venv/bin/activate
-
 python -m pip install -U pip
 python -m pip install -e .
+```
 
 Requirements:
-Python ≥ 3.10
+- Python ≥ 3.10
+
+---
+
+# Try it in 60 seconds
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -U pip
+python -m pip install -e .
+midas analyze --synth weak_id --N 976 --seed 123456 --baseline-random
+```
+
+Expected:
+- prints a modular fingerprint
+- returns a verdict: `random_like` / `weak_structure` / `structured`
 
 ---
 
 # Usage
 
 Analyze a synthetic dataset:
+```bash
 midas analyze --synth weak_id --N 976 --seed 123456 --baseline-random
+```
 
 Analyze integers from a file:
+```bash
 midas analyze --input data.txt --baseline-random
+```
 
 Run anomaly scanner:
+```bash
 midas analyze --input data.txt --baseline-random --scan-anomalies
+```
 
 ---
 
@@ -136,7 +159,9 @@ midas analyze --input data.txt --baseline-random --scan-anomalies
 MIDAS uses **golden tests** to guarantee deterministic CLI output.
 
 Run tests with:
+```bash
 pytest
+```
 
 Golden tests ensure:
 - stable output
